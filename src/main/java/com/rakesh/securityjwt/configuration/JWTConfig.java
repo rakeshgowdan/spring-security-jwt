@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.rakesh.securityjwt.service.UserDetailServiceHandler;
 
@@ -20,6 +21,9 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 
 	@Autowired
 	private UserDetailServiceHandler userDetailServiceHandler;
+	
+	@Autowired
+	private JWTAuthFilter jwtAuthFilter;
 	
 	//using this method, we specify what is the auth imple type
 	@Override
@@ -46,6 +50,7 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 				.anyRequest().authenticated()   //for any other request authentication is mandate 
 				.and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // every request should be independent & server need not to manage session
+	http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 	@Bean

@@ -41,7 +41,7 @@ public class UserLoginController {
 		//Generate token
 		UserDetails details = userDetailServiceHandler.loadUserByUsername(userRequest.getUserName());
 		String token=jwtUtil.generateToken(details);
-		UserResponse userResponse= new UserResponse(userRequest.getUserName(), "Token Generated succssfully", token, new java.util.Date());
+		UserResponse userResponse= new UserResponse(userRequest.getUserName(), "Token Generated Sucessfully", token, new java.util.Date());
 		return new ResponseEntity<UserResponse>(userResponse,HttpStatus.OK);
 	}
 }
