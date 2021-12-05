@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rakesh.securityjwt.dto.UserRequest;
-import com.rakesh.securityjwt.dto.UserResponse;
+import com.rakesh.securityjwt.dto.UserRequestDTO;
+import com.rakesh.securityjwt.dto.UserResponseDTO;
 import com.rakesh.securityjwt.service.UserDetailServiceHandler;
 import com.rakesh.securityjwt.utilities.JWTUtil;
 
@@ -32,16 +32,16 @@ public class UserLoginController {
 	private AuthenticationManager authenticationManager;
 
 	@PostMapping("/userAuthenticate")
-	public ResponseEntity<UserResponse> userAuthenticate(@RequestBody UserRequest userRequest) {
+	public ResponseEntity<UserResponseDTO> userAuthenticate(@RequestBody UserRequestDTO userRequestDTO) {
 
 		// authenticate user
 		authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(userRequest.getUserName(), userRequest.getPassword()));
+				new UsernamePasswordAuthenticationToken(userRequestDTO.getUserName(), userRequestDTO.getPassword()));
 
 		//Generate token
-		UserDetails details = userDetailServiceHandler.loadUserByUsername(userRequest.getUserName());
+		UserDetails details = userDetailServiceHandler.loadUserByUsername(userRequestDTO.getUserName());
 		String token=jwtUtil.generateToken(details);
-		UserResponse userResponse= new UserResponse(userRequest.getUserName(), "Token Generated Sucessfully", token, new java.util.Date());
-		return new ResponseEntity<UserResponse>(userResponse,HttpStatus.OK);
+		UserResponseDTO userResponseDTO= new UserResponseDTO(userRequestDTO.getUserName(), "Token Generated Sucessfully", token, new java.util.Date());
+		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 	}
 }

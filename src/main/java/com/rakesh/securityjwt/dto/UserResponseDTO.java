@@ -1,5 +1,9 @@
 package com.rakesh.securityjwt.dto;
 
+
+
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,9 +11,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class UserRequest {
+public class UserResponseDTO {
 
 	private String userName;
-	private String password;
+	private String Message;
+	private String token;
+	private Date date;
 }
