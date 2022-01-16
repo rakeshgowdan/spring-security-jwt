@@ -9,8 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.rakesh.securityjwt.service.UserDetailServiceHandler;
@@ -25,11 +24,14 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 	@Autowired
 	private JWTAuthFilter jwtAuthFilter;
 	
+	@Autowired
+	private JwtAuthenticationEntryPoint jwtAuthEntryPoint;
+	
 	//using this method, we specify what is the auth imple type
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		
-		auth.userDetailsService(userDetailServiceHandler);
+		auth.userDetailsService(userDetailServiceHandler).passwordEncoder(passwordEncode());
 	}
 
 	
@@ -45,17 +47,19 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 				//Cross-origin resource sharing is a mechanism that allows restricted resources on a web page to be requested from another domain outside the domain from which the first resource was served
 				.disable()
 				.authorizeRequests()
-				.antMatchers("/api/auth/userAuthenticate")  //only allow this endpoint with out authentication
+				.antMatchers("/api/auth/userAuthenticate","/api/v1/user/role/**","/api/auth/register")  //only allow this endpoint with out authentication
 				.permitAll()
 				.anyRequest().authenticated()   //for any other request authentication is mandate 
+				.and()
+				.exceptionHandling().authenticationEntryPoint(jwtAuthEntryPoint)
 				.and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // every request should be independent & server need not to manage session
 	http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 	@Bean
-	public PasswordEncoder passwordEncode() {
-		return NoOpPasswordEncoder.getInstance();
+	public BCryptPasswordEncoder passwordEncode() {
+		return new BCryptPasswordEncoder();
 	}
 	
 	@Bean
