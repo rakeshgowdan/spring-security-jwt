@@ -20,7 +20,7 @@ import com.rakesh.securityjwt.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/api/v1/role")
+@RequestMapping("/api/v1/userRole")
 @Slf4j
 public class RoleController {
 

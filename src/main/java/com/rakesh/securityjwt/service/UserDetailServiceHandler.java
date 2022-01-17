@@ -3,6 +3,10 @@ package com.rakesh.securityjwt.service;
 
 
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,10 +15,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.rakesh.securityjwt.dao.RoleRepository;
 import com.rakesh.securityjwt.dao.UserRepository;
 import com.rakesh.securityjwt.dto.UserDTO;
+import com.rakesh.securityjwt.dto.UserRoleDTO;
 import com.rakesh.securityjwt.pojo.User;
-
+import com.rakesh.securityjwt.pojo.UserRole;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +34,9 @@ public class UserDetailServiceHandler implements UserDetailsService {
 	
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private RoleRepository roleRepository;
 	
 	//this method does validation for user existence 
 	@Override
@@ -43,6 +52,18 @@ public class UserDetailServiceHandler implements UserDetailsService {
 		}
         UserDTO userDTO=new UserDTO();
         BeanUtils.copyProperties(user1, userDTO);
+        
+      //convert UserRole to UserRoleDTO
+        Set<UserRoleDTO> setOfUserRoleDTO = new HashSet<>();
+        UserRoleDTO setRoleDTO = null;
+        for(UserRole userRole :user1.getRoles()){
+        	setRoleDTO = new UserRoleDTO();
+        	setRoleDTO.setRoleName(userRole.getRoleName());
+        	setRoleDTO.setRoleId(userRole.getRoleId());
+        	setOfUserRoleDTO.add(setRoleDTO);
+        }
+        userDTO.setRoles(setOfUserRoleDTO);
+        
 		return userDTO;
 		
 		/*
@@ -53,14 +74,42 @@ public class UserDetailServiceHandler implements UserDetailsService {
 		 */
 	}
 	public UserDTO registerUser(UserDTO userDTO) {
-		log.info("Service layer | registerUser()---> USERDTO   "+userDTO);
+		
 		User user=new User();
-		BeanUtils.copyProperties(userDTO, user);
+		BeanUtils.copyProperties(userDTO, user); //it doesnt do deep copy
+		
+		Set<UserRole> setOfUserRole=new HashSet<>();
+		
+		//fetch every role from DB based on role id and than set this role to user entity roles
+		for(UserRoleDTO roleDTO:userDTO.getRoles()) {
+			log.info("in register| roleDTO ---------------->"+ roleDTO);
+			Optional<UserRole> userRole=roleRepository.findById(roleDTO.getRoleId());
+			log.info("in register| roleDTO--------------->"+userRole);
+			if(userRole.isPresent()) {
+				setOfUserRole.add(userRole.get());
+			}
+		}
+		
+		user.setRoles(setOfUserRole);
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		log.info("Service layer | registerUser()---> user object before saving  "+user);
+		log.info(" IN register--before save-->"+user);
 		user= userRepository.save(user);
-		log.info("Service layer | registerUser()---> USER object after save() "+user);
 		BeanUtils.copyProperties(user, userDTO);
+		log.info(" IN register--after save-->"+userDTO);
+		
+		
+		//convert UserRole to UserRoleDTO
+		log.info(" IN register--before response convertion-->"+userDTO);
+        Set<UserRoleDTO> setOfUserRoleDTO = new HashSet<>();
+        UserRoleDTO setRoleDTO = null;
+        for(UserRole userRole :user.getRoles()){
+        	setRoleDTO = new UserRoleDTO();
+        	setRoleDTO.setRoleName(userRole.getRoleName());
+        	setRoleDTO.setRoleId(userRole.getRoleId());
+        	setOfUserRoleDTO.add(setRoleDTO);
+        }
+        userDTO.setRoles(setOfUserRoleDTO);
+		log.info(" IN register--after response convertion-->"+userDTO);
 		return userDTO;
 	}
 	
