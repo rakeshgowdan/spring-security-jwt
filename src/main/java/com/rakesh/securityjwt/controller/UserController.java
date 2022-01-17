@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,15 +43,19 @@ public class UserController {
 	@PostMapping("/userAuthenticate")
 	public ResponseEntity<UserResponseDTO> userAuthenticate(@RequestBody UserRequestDTO userRequestDTO) {
 
+		log.info("UserController | userAuthenticate()------>" +userRequestDTO);
+		
+		UsernamePasswordAuthenticationToken authToken=new UsernamePasswordAuthenticationToken(userRequestDTO.getUname(), userRequestDTO.getPassword());
 		// authenticate user
-		authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(userRequestDTO.getUserName(), userRequestDTO.getPassword()));
-
+		authenticationManager.authenticate(authToken);
+		
 		// Generate token
-		UserDetails details = userDetailServiceHandler.loadUserByUsername(userRequestDTO.getUserName());
+		UserDetails details = userDetailServiceHandler.loadUserByUsername(userRequestDTO.getUname());
 		String token = jwtUtil.generateToken(details);
-		UserResponseDTO userResponseDTO = new UserResponseDTO(userRequestDTO.getUserName(),
-				"Token Generated Sucessfully", token, new java.util.Date());
+		
+		
+		UserResponseDTO userResponseDTO = new UserResponseDTO(userRequestDTO.getUname(),"Token Generated Sucessfully", token, new java.util.Date());
+		
 		return new ResponseEntity<UserResponseDTO>(userResponseDTO, HttpStatus.OK);
 	}
 
@@ -60,9 +65,14 @@ public class UserController {
 		UserDTO userdto=userDetailServiceHandler.registerUser(userDTO);
 		return new ResponseEntity<UserDTO>(userdto, HttpStatus.CREATED);
 	}
-	@GetMapping("/currentUser")
-	public UserDTO getCurrentUser(Principal principal) {
-		UserDetails details=this.userDetailServiceHandler.loadUserByUsername(principal.getName());
+	@GetMapping("/user/currentUser")
+	public UserDTO getCurrentUser(Principal authentication) {
+		log.info("UserController | getCurrentUser()------>" +authentication);
+		UserDetails details=null;
+		if(authentication!=null) {
+			details=userDetailServiceHandler.loadUserByUsername(authentication.getName());
+		
+		}
 		return (UserDTO) details;
 	}
 }

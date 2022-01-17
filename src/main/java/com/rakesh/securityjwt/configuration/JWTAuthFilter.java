@@ -37,35 +37,28 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 		// gets called before any controller
 
 		String bearerToken = request.getHeader("Authorization");
-		String username = null;
+		String uname = null;
 		String token = null;
+		
 		// check if token exist or has bearer text
-		log.info("--------------------------------------------------------------------------------------");
-		log.info(bearerToken +"--> bearer token");
-		log.info("--------------------------------------------------------------------------------------");
 		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
 			// extract jwt from bearertoken
 			token = bearerToken.substring(7);
 			try {
 				// get username from token
-				username = jwtUtil.extractUsername(token);
-				// get user details by loading from user deatils
-				UserDetails userDetails= userDetailServiceHandler.loadUserByUsername(username);
-				log.info("--------------------------------------------------------------------------------------");
-				log.info(username+"-->username");
-				log.info("security context", SecurityContextHolder.getContext().getAuthentication());
-				log.info("--------------------------------------------------------------------------------------");
-				// check user name null &
-				if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				
+				uname = jwtUtil.extractUname(token);
+				
+				UserDetails userDetails= userDetailServiceHandler.loadUserByUsername(uname);
+				if (uname != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 					UsernamePasswordAuthenticationToken authToken= new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
 					
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-					
+						
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				} else {
 					log.info("--------------------------------------------------------------------------------------");
 					log.error("Invalid bearer token ");
-				//	logger.error("Invalid bearer token ");
 					log.info("--------------------------------------------------------------------------------------");
 				}
 			} catch (Exception e) {
@@ -74,7 +67,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 		} else {
 			log.info("--------------------------------------------------------------------------------------");
 			log.error("Invalid bearer token format");
-			//logger.error("Invalid bearer token format");
 			log.info("--------------------------------------------------------------------------------------");
 		}
 		

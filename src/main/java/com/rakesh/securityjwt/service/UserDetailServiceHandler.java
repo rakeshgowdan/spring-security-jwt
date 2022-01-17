@@ -33,9 +33,10 @@ public class UserDetailServiceHandler implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String uname) throws UsernameNotFoundException {
 		
-		
+		log.info("Service Layer | UserDetailServiceHandler()---> "+uname);
 		
 		User user1=userRepository.findByuname(uname);
+		log.info("Service Layer | UserDetailServiceHandler()---> "+user1);
 		
 		if(user1==null){
 			throw new UsernameNotFoundException("User does not exist!");
