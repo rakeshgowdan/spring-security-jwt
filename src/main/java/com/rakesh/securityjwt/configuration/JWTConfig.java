@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,6 +17,7 @@ import com.rakesh.securityjwt.service.UserDetailServiceHandler;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled=true)//this helps to add method level auth security
 public class JWTConfig  extends WebSecurityConfigurerAdapter{
 
 	@Autowired
@@ -47,7 +49,7 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 				//Cross-origin resource sharing is a mechanism that allows restricted resources on a web page to be requested from another domain outside the domain from which the first resource was served
 				.disable()
 				.authorizeRequests()
-				.antMatchers("/api/auth/userAuthenticate","/api/v1/userRole/**","/api/auth/register")  //only allow this endpoint with out authentication
+				.antMatchers("/swagger-resources/**","/v3/**","/v2/**","/webjars/**","/swagger-ui.html","/swagger-ui/**","/api/auth/userAuthenticate","/api/v1/userRole/**","/api/auth/register")  //only allow this endpoint with out authentication
 				.permitAll()
 				.anyRequest().authenticated()   //for any other request authentication is mandate 
 				.and()
