@@ -13,7 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.rakesh.securityjwt.service.UserDetailServiceHandler;
+import com.rakesh.securityjwt.service.UserServiceImple;
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +21,7 @@ import com.rakesh.securityjwt.service.UserDetailServiceHandler;
 public class JWTConfig  extends WebSecurityConfigurerAdapter{
 
 	@Autowired
-	private UserDetailServiceHandler userDetailServiceHandler;
+	private UserServiceImple userDetailServiceHandler;
 	
 	@Autowired
 	private JWTAuthFilter jwtAuthFilter;
@@ -33,6 +33,9 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		
+		// configure AuthenticationManager so that it knows from where to load
+		// user for matching credentials
+		// Use BCryptPasswordEncoder
 		auth.userDetailsService(userDetailServiceHandler).passwordEncoder(passwordEncode());
 	}
 
@@ -56,7 +59,8 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 				.exceptionHandling().authenticationEntryPoint(jwtAuthEntryPoint)
 				.and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // every request should be independent & server need not to manage session
-	http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+		// Add a filter to validate the tokens with every reques
+		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 	@Bean

@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.rakesh.securityjwt.service.UserDetailServiceHandler;
+import com.rakesh.securityjwt.service.UserServiceImple;
 import com.rakesh.securityjwt.utilities.JWTUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JWTAuthFilter extends OncePerRequestFilter {
 
 	@Autowired
-	private UserDetailServiceHandler userDetailServiceHandler;
+	private UserServiceImple userDetailServiceHandler;
 
 	@Autowired
 	private JWTUtil jwtUtil;
@@ -40,7 +40,9 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 		String uname = null;
 		String token = null;
 		
-		// check if token exist or has bearer text
+		
+		// JWT Token is in the form "Bearer token". Remove Bearer word and get
+		// only the Token
 		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
 			// extract jwt from bearertoken
 			token = bearerToken.substring(7);
@@ -50,11 +52,16 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 				uname = jwtUtil.extractUname(token);
 				
 				UserDetails userDetails= userDetailServiceHandler.loadUserByUsername(uname);
+				// Once we get the token validate it.
 				if (uname != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+					
 					UsernamePasswordAuthenticationToken authToken= new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
 					
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 						
+					// After setting the Authentication in the context, we specify
+					// that the current user is authenticated. So it passes the
+					// Spring Security Configurations successfully.
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				} else {
 					log.info("--------------------------------------------------------------------------------------");

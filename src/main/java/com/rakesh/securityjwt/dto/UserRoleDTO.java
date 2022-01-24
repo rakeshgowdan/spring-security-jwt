@@ -3,7 +3,7 @@ package com.rakesh.securityjwt.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class UserRoleDTO {
 
 	private long roleId;
+	@ApiModelProperty(notes = "roleName",name="roleName",required=true,value="test name")
 	private String roleName;
 }
 /*

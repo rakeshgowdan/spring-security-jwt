@@ -9,39 +9,47 @@ import org.springframework.stereotype.Service;
 
 import com.rakesh.securityjwt.dao.RoleRepository;
 import com.rakesh.securityjwt.dto.UserRoleDTO;
+import com.rakesh.securityjwt.exception.UserRoleException;
 import com.rakesh.securityjwt.pojo.UserRole;
 
-import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Slf4j
+
 public class RoleServiceImplementation implements RoleService {
 
 	@Autowired
 	private RoleRepository roleRepository;
 	@Override
-	public UserRoleDTO createRole(UserRoleDTO userRoleDTO) {
-		log.info("-----------------Role Repository--------");
+	public UserRoleDTO createRole(UserRoleDTO userRoleDTO) throws UserRoleException {
+		
 		UserRole userRole = new UserRole();
 		BeanUtils.copyProperties(userRoleDTO, userRole); // DTO-->POJO
-		log.info(userRole+"--------->userRole");
+		
 		UserRole userRoleResponse = roleRepository.save(userRole);
 		BeanUtils.copyProperties(userRoleResponse, userRoleDTO);// POJO-->DTO
-		log.info(userRoleDTO+"--------->userRoleDTO");
+		
+		if(userRoleDTO==null) {
+			throw new UserRoleException(true, "Unable to create the role!! try again", null);
+		}
 		return userRoleDTO;
 	
 	}
 
 	@Override
-	public UserRoleDTO getUserRoleById(Long roleId) {
+	public UserRoleDTO getUserRoleById(Long roleId) throws UserRoleException{
+		
 		UserRole userRole=roleRepository.findById(roleId).get();
 		UserRoleDTO userRoleDTO=new UserRoleDTO();
 		BeanUtils.copyProperties(userRole, userRoleDTO);
+		
+		if(userRole==null) {
+			throw new UserRoleException(true, "Unable to create the role!! try again", null);
+		}
 				return userRoleDTO;
 	}
 
 	@Override
-	public List<UserRoleDTO> getAllRoles() {
+	public List<UserRoleDTO> getAllRoles() throws UserRoleException {
 		List<UserRole> listOfUserRole=roleRepository.findAll();
 		List<UserRoleDTO> listOfUserRoleDTO=new ArrayList<>();
 		UserRoleDTO userRoleDTO=null;
@@ -50,12 +58,22 @@ public class RoleServiceImplementation implements RoleService {
 			BeanUtils.copyProperties(role, userRoleDTO);
 			listOfUserRoleDTO.add(userRoleDTO);
 		}
+		if(listOfUserRoleDTO.isEmpty()) {
+			throw new UserRoleException(true, "Unable to fetch list of roles", null);
+		}
+			
 		return listOfUserRoleDTO;
 	}
 
 	@Override
-	public void deleteUserRoleById(Long roleId) {
-		roleRepository.deleteById(roleId);
+	public void deleteUserRoleById(Long roleId) throws UserRoleException,IllegalArgumentException,IllegalStateException {
+		
+		if(roleRepository.existsById(roleId)) {
+			roleRepository.deleteById(roleId);
+		}
+		else {
+			throw new UserRoleException(true, "Unable to delete user by id", null);
+		}
 		
 	}
 }
