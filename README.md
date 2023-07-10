@@ -1,15 +1,19 @@
 # spring-security-jwt
  
 
-# swagger & openAPI 3.0
-# springdoc-openapi v1.6.4
+## swagger & openAPI 3.0
+
+## springdoc-openapi v1.6.4
+
 https://springdoc.org/#modules
-# swagger to pdf website 
+
+## swagger to pdf website 
+
 https://www.swdoc.org/
 
 
-# How to Build a Java RESTful API with Spring Boot
-# standard document 
+## How to Build a Java RESTful API with Spring Boot
+## standard document 
 https://rapidapi.com/blog/how-to-build-an-api-with-java/
 ## swagger to pdf
 can modify your REST project, so as to produce the needed static documents (html, pdf etc) upon building the project.
