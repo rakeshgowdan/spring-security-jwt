@@ -10,9 +10,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.rakesh.securityjwt.dto.CommonResponse;
-import com.rakesh.securityjwt.dto.exception.UserRoleExceptionDTO;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
+
 
 @RestControllerAdvice
+@Slf4j
 public class ExceptionInterceptor extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(UserException.class)
@@ -24,10 +28,9 @@ public class ExceptionInterceptor extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(UserRoleException.class)
 	@ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-	public final CommonResponse handleUserRoleExceptions(UserException ex) {
-		UserRoleExceptionDTO exceptionResponse = new UserRoleExceptionDTO(500, true, ex.getMessage(), new Date(),
-				ex.getData(), null);
-		return new CommonResponse(500, true, ex.getMessage(), new Date(), exceptionResponse, ex.getCause());
+	public final CommonResponse handleUserRoleExceptions(UserRoleException ex) {
+
+		return new CommonResponse(500, true, ex.getMessage(), new Date(), ex.getData(), ex.getCause());
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
@@ -43,5 +46,10 @@ public class ExceptionInterceptor extends ResponseEntityExceptionHandler {
 	public final CommonResponse handleusernameNotFoundException(UsernameNotFoundException ex) {
 		return new CommonResponse(404, true,ex.getMessage(), new Date(), ex.getMessage(), ex.getCause());
 	}
-	
+	@ExceptionHandler(ExpiredJwtException.class)
+	@ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+	public final CommonResponse handleExpiredJwtException(ExpiredJwtException ex) {
+		 log.error("Error from people-sensing application : {} ", ex.getMessage());
+		return new CommonResponse(401, true,ex.getMessage(), new Date(), ex.getMessage(), ex.getCause());
+	}
 }

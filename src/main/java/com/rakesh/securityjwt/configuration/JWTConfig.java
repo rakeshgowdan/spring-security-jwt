@@ -52,7 +52,7 @@ public class JWTConfig  extends WebSecurityConfigurerAdapter{
 				//Cross-origin resource sharing is a mechanism that allows restricted resources on a web page to be requested from another domain outside the domain from which the first resource was served
 				.disable()
 				.authorizeRequests()
-				.antMatchers("/swagger-resources/**","/v3/**","/v2/**","/webjars/**","/swagger-ui.html","/swagger-ui/**","/api/auth/userAuthenticate","/api/v1/userRole/**","/api/auth/register")  //only allow this endpoint with out authentication
+				.antMatchers("/swagger-resources/**","/v3/**","/v2/**","/webjars/**","/swagger-ui.html","/swagger-ui/**","/api/auth/userAuthenticate","/api/v1/userRole/**","/api/auth/register","/actuator/**","/info/**")  //only allow this endpoint with out authentication
 				.permitAll()
 				.anyRequest().authenticated()   //for any other request authentication is mandate 
 				.and()

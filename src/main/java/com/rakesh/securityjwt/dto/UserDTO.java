@@ -78,6 +78,8 @@ public class UserDTO implements UserDetails {
 		return this.getUname();
 	}
 
-	
+	public String getMailId() {
+		return this.mailId;
+	}
 
 }

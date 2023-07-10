@@ -3,8 +3,12 @@ package com.rakesh.securityjwt.utilities;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +25,7 @@ import java.util.function.Function;
 //Method to validate JWT token
 //Method to check expire of  JWT token
 @Component
+@Slf4j
 public class JWTUtil {
 
 	@Value("${jwt.secret}")
@@ -28,6 +33,9 @@ public class JWTUtil {
 	
 	@Value("${jwt.token-expirationInMs}")
 	private Integer tokenExpirationInMs;
+	
+	@Value("${jwt.refreshExpirationDateInMs}")
+	private Integer refreshExpirationDateInMs;
 
 	//retrieve username from jwt token
 	    public String extractUname(String token) {
@@ -69,7 +77,31 @@ public class JWTUtil {
 	    }
 	    //validate token
 	    public Boolean validateToken(String token, UserDetails userDetails) {
+	    	
+	    	 try {
 	        final String username = extractUname(token);
 	        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+	    	 }
+	    	 catch (SignatureException e) {
+	    	      log.error("Invalid JWT signature: {}", e.getMessage());
+	    	    } catch (MalformedJwtException e) {
+	    	      log.error("Invalid JWT token: {}", e.getMessage());
+	    	    } catch (ExpiredJwtException e) {
+	    	      log.error("JWT token is expired: {}", e.getMessage());
+	    	    } catch (UnsupportedJwtException e) {
+	    	      log.error("JWT token is unsupported: {}", e.getMessage());
+	    	    } catch (IllegalArgumentException e) {
+	    	      log.error("JWT claims string is empty: {}", e.getMessage());
+	    	    }
+	    	 return false;
 	    }
+	    
+	    //refresh token
+	    public String doGenerateRefreshToken(Map<String, Object> claims, String subject) {
+
+			return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+					.setExpiration(new Date(System.currentTimeMillis() + refreshExpirationDateInMs))
+					.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
+
+		}
 }

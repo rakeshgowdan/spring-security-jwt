@@ -1,8 +1,8 @@
 package com.rakesh.securityjwt.service;
 
-import java.util.ArrayList;
+
 import java.util.HashSet;
-import java.util.List;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,6 +41,8 @@ public class UserServiceImple implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String uname) throws UsernameNotFoundException {
 
+		
+		
 		User user1 = userRepository.findByuname(uname);
 
 		if (user1 == null) {
@@ -94,41 +96,48 @@ public class UserServiceImple implements UserDetailsService {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 
 		User checkExistingUsername=userRepository.findByuname(user.getUname());
-		log.info("registerUser() --------checkExistingUsername-----   "+ checkExistingUsername);
-		log.info("registerUser() --------user                "+ user);
-		log.info(checkExistingUsername.getUname()+ "---"+user.getUname());
-		
-		if(checkExistingUsername.getUname().equals(user.getUname()) ||
-					checkExistingUsername.getMailId().equals(user.getMailId()) ||
-					checkExistingUsername.getMobileNo().equals(user.getMobileNo())) {
-			log.info("registerUser()---------UserException");
-			throw new UserException(true,"User details already exists",userDTO);
-		
-		}
-		else {
+		/*
+		 * log.info("registerUser() --------checkExistingUsername-----   "+
+		 * checkExistingUsername);
+		 * log.info("registerUser() --------user                "+ user);
+		 * log.info(checkExistingUsername.getUname()+ "---"+user.getUname());
+		 */
+		if(checkExistingUsername!=null) {
 			
-			user = userRepository.save(user);
-			if (user != null) {
-				BeanUtils.copyProperties(user, userDTO);
-	
-				// convert UserRole to UserRoleDTO
-	
-				Set<UserRoleDTO> setOfUserRoleDTO = new HashSet<>();
-				UserRoleDTO setRoleDTO = null;
-							for (UserRole userRole : user.getRoles()) {
-								setRoleDTO = new UserRoleDTO();
-								setRoleDTO.setRoleName(userRole.getRoleName());
-								setRoleDTO.setRoleId(userRole.getRoleId());
-								setOfUserRoleDTO.add(setRoleDTO);
+								if(checkExistingUsername.getUname().equals(user.getUname()) ||
+										checkExistingUsername.getMailId().equals(user.getMailId()) ||
+											checkExistingUsername.getMobileNo().equals(user.getMobileNo())) {
+									log.info("registerUser()---------UserException");
+									throw new UserException(true,"User details already exists",userDTO);
+								
+								}
+							
+	}else {
+		user = userRepository.save(user);
+				if (user != null) {
+					BeanUtils.copyProperties(user, userDTO);
+		
+					// convert UserRole to UserRoleDTO
+		
+					Set<UserRoleDTO> setOfUserRoleDTO = new HashSet<>();
+					UserRoleDTO setRoleDTO = null;
+								for (UserRole userRole : user.getRoles()) {
+									setRoleDTO = new UserRoleDTO();
+									setRoleDTO.setRoleName(userRole.getRoleName());
+									setRoleDTO.setRoleId(userRole.getRoleId());
+									setOfUserRoleDTO.add(setRoleDTO);
+								}
+					userDTO.setRoles(setOfUserRoleDTO);
+		
+					return userDTO;
+									}
+				else {
+								throw new UserException(true, "Registartion failed", userDTO);
 							}
-				userDTO.setRoles(setOfUserRoleDTO);
-
-				return userDTO;
-			} else {
-				throw new UserException(true, "Registartion failed", userDTO);
-			}
-			
-		}
+	}
+		return null;
+		
+		
 	}
 
 }

@@ -159,3 +159,16 @@ If you want your generated html document to become part of your war file you hav
 ```
 
 The war plugin works on the generated documentation - as such, you must make sure that those plugins have been executed in an earlier phase.
+
+
+----------------------------------------------------------------------------------
+# Handling io.jsonwebtoken.ExpiredJwtException
+Your GlobalExceptionHandler isn't truly global, it will only catch exceptions that occur in your controller (hence ControllerAdvice), the exceptions you are running into are occurring in servlet filters, which is where Spring Security does pretty much all of its work. This little chart may help explain what I am talking about:
+
+PreFilters <- Executed before entering your controller, decryption of JWT is happening here
+
+Controller <- ControllerAdvice will catch all exceptions thrown here
+
+PostFilters <- Executed after exiting your controller
+
+Luckily Spring Security already has mechanisms in place for handling exceptions that occur when doing things like decrypting a JWT in a filter. You will want to update your SpringSecurityConfig like so. Note its important that the ExceptionTranslationFilter is after your StatelessAuthenticationFilter (or whatever you named the filter where the JWT decryption is occurring).
